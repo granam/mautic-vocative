@@ -27,7 +27,7 @@ class ConfigTest extends TestCase
                 self::assertTrue(class_exists($value), "Can not find class {$value}");
             } elseif ($key === 'factory') {
                 self::assertTrue(class_exists($value[0]), "Can not find class {$value[0]}");
-                self::assertTrue(is_callable($value[0] . '::' . $value[1]), "Can not call {$value[0]} . '::' . {$value[1]}");
+                self::assertTrue(is_callable([$value[0], $value[1]]), "Cannot call {$value[0]}::{$value[1]}");
             } elseif (is_array($value)) {
                 $this->checkClassesExistence($value);
             }

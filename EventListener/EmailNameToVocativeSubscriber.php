@@ -4,20 +4,15 @@ declare(strict_types=1);
 
 namespace MauticPlugin\GranamCzechVocativeBundle\EventListener;
 
-use Mautic\EmailBundle\EmailEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Mautic\EmailBundle\Event\EmailSendEvent;
 use MauticPlugin\GranamCzechVocativeBundle\Service\NameToVocativeConverter;
-use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class EmailNameToVocativeSubscriber implements EventSubscriberInterface
 {
-
     public const SERVICE_ID = 'plugin.vocative.emailNameToVocative.subscriber';
 
-    /**
-     * @var NameToVocativeConverter
-     */
-    private $nameToVocativeConverter;
+    private NameToVocativeConverter $nameToVocativeConverter;
 
     public function __construct(NameToVocativeConverter $nameToVocativeConverter)
     {
@@ -25,29 +20,26 @@ class EmailNameToVocativeSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @return array
+     * @return array<string, array>
      */
     public static function getSubscribedEvents(): array
     {
         return [
-            EmailEvents::EMAIL_ON_SEND => ['onEmailGenerate', -999 /* lowest priority - latest */],
-            EmailEvents::EMAIL_ON_DISPLAY => ['onEmailGenerate', -999 /* lowest priority - latest */],
+            'mautic.email_on_send' => ['onEmailGenerate', -999],
+            'mautic.email_on_display' => ['onEmailGenerate', -999],
         ];
     }
 
-    /**
-     * @param EmailSendEvent $event
-     */
-    public function onEmailGenerate(EmailSendEvent $event)
+    public function onEmailGenerate(EmailSendEvent $event): void
     {
         $content = $event->getSubject()
-            . $event->getContent(true /* with tokens replaced (to get names) */)
+            . $event->getContent(true) // With tokens replaced
             . $event->getPlainText();
+
         $tokenList = $this->nameToVocativeConverter->findAndReplace($content);
-        if (count($tokenList) > 0) {
+
+        if (!empty($tokenList)) {
             $event->addTokens($tokenList);
-            unset($tokenList);
         }
     }
-
 }

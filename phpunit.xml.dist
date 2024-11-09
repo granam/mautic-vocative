@@ -1,19 +1,26 @@
 <?xml version="1.0"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
-         bootstrap="./Tests/tests_bootstrap.php" convertErrorsToExceptions="true"
-         convertNoticesToExceptions="true" convertWarningsToExceptions="true" stopOnFailure="false"
-         processIsolation="false" backupGlobals="false" colors="true">
-    <coverage includeUncoveredFiles="true" processUncoveredFiles="false">
+         bootstrap="./Tests/tests_bootstrap.php"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         failOnRisky="true"
+         failOnWarning="true"
+         stopOnFailure="false"
+         backupGlobals="false"
+         colors="true">
+
+    <coverage includeUncoveredFiles="true">
         <include>
-            <directory>.</directory>
+            <directory>./Service</directory>
+            <directory>./EventListener</directory>
+            <directory>./Config</directory>
         </include>
-        <exclude>
-            <directory>Tests</directory>
-        </exclude>
     </coverage>
+
     <testsuites>
-        <testsuite name="all">
+        <testsuite name="All Tests">
             <directory>./Tests</directory>
         </testsuite>
     </testsuites>

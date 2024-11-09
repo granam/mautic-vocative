@@ -1,0 +1,73 @@
+Step-by-Step Tutorial for Integrating granam/czech-vocative with Mautic Plugin
+Modify composer.json in Mautic Root Directory
+
+Originally, your composer.json file contained the following in the "require" section:
+
+
+----
+  "require": {
+    "composer/installers": "^1.11",
+    "mautic/core-lib": "^5.0"
+  },
+----
+You need to add the granam/czech-vocative package, so it becomes:
+
+
+----
+  "require": {
+    "composer/installers": "^1.11",
+    "mautic/core-lib": "^5.0",
+    "granam/czech-vocative": "^2.2"
+  },
+----
+Update Dependencies
+
+After making the changes in composer.json, navigate to the root directory of your Mautic installation:
+
+
+----
+cd /home/vyhraj.cz/domains/m.vyhraj.cz/public_html
+----
+Run the following command to update the dependencies and install granam/czech-vocative:
+
+
+
+----
+composer update granam/czech-vocative
+----
+Clear Cache and Reload Plugins
+
+Once the package is installed, you need to clear the cache and reload the plugins for the changes to take effect:
+
+
+----
+sudo /usr/bin/php /home/vyhraj.cz/domains/m.vyhraj.cz/public_html/bin/console cache:clear
+sudo /usr/bin/php /home/vyhraj.cz/domains/m.vyhraj.cz/public_html/bin/console mautic:plugins:reload
+----
+Verify Installation
+
+Check that the plugin is installed correctly and that there are no errors in the logs.
+If you see any "ClassNotFoundError" for Granam\CzechVocative\CzechName, it may indicate that the package is not correctly installed in the root vendor folder.
+Important Notes
+
+Do not keep a separate vendor folder inside the plugin directory. Instead, rely on Mautic’s root vendor folder to avoid conflicts.
+Make sure to use the root autoload.php in your plugin bundle class, like this:
+
+
+----
+namespace MauticPlugin\GranamCzechVocativeBundle;
+
+use Mautic\PluginBundle\Bundle\PluginBundleBase;
+
+class GranamCzechVocativeBundle extends PluginBundleBase
+{
+    public function boot()
+    {
+        // Use Mautic root autoload
+        if (file_exists(__DIR__ . '/../../vendor/autoload.php')) {
+            require_once __DIR__ . '/../../vendor/autoload.php';
+        }
+    }
+}
+----
+This way, the plugin can access shared dependencies from Mautic’s root installation.
