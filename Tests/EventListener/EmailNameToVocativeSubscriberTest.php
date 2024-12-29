@@ -21,7 +21,7 @@ class EmailNameToVocativeSubscriberTest extends GranamTestWithMockery
     public function Conversion_reacts_both_on_send_and_view_of_email()
     {
         self::assertEquals(
-            [EmailEvents::EMAIL_ON_SEND, EmailEvents::EMAIL_ON_DISPLAY],
+            ['mautic.email_on_send', 'mautic.email_on_display'],
             array_keys(EmailNameToVocativeSubscriber::getSubscribedEvents())
         );
     }
@@ -47,7 +47,7 @@ class EmailNameToVocativeSubscriberTest extends GranamTestWithMockery
     private function getLeadEmailEventsPriorities(): array
     {
         $subscribedEvents = EmailSubscriber::getSubscribedEvents();
-        $lookedForEvents = [EmailEvents::EMAIL_ON_SEND, EmailEvents::EMAIL_ON_DISPLAY];
+        $lookedForEvents = ['mautic.email_on_send', 'mautic.email_on_display'];
         self::assertNotEmpty($lookedForEvents);
         $watchedEvents = array_filter(
             $subscribedEvents,

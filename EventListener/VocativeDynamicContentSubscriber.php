@@ -4,23 +4,15 @@ declare(strict_types=1);
 
 namespace MauticPlugin\GranamCzechVocativeBundle\EventListener;
 
-use Mautic\CoreBundle\Event as MauticEvents;
-use Mautic\DynamicContentBundle\DynamicContentEvents;
-use MauticPlugin\GranamCzechVocativeBundle\Service\NameToVocativeConverter;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Mautic\DynamicContentBundle\Event\TokenReplacementEvent;
+use MauticPlugin\GranamCzechVocativeBundle\Service\NameToVocativeConverter;
 
-/**
- * Class DynamicContentSubscriber.
- */
 class VocativeDynamicContentSubscriber implements EventSubscriberInterface
 {
-
     public const SERVICE_ID = 'plugin.vocative.dynamic.content.subscriber';
 
-    /**
-     * @var NameToVocativeConverter
-     */
-    private $nameToVocativeConverter;
+    private NameToVocativeConverter $nameToVocativeConverter;
 
     public function __construct(NameToVocativeConverter $nameToVocativeConverter)
     {
@@ -28,25 +20,24 @@ class VocativeDynamicContentSubscriber implements EventSubscriberInterface
     }
 
     /**
-     * @return array
+     * @return array<string, array>
      */
     public static function getSubscribedEvents(): array
     {
         return [
-            DynamicContentEvents::TOKEN_REPLACEMENT => ['onTokenReplacement', -10],
+            'mautic.dynamic_content_on_token_replacement' => ['onTokenReplacement', -10],
         ];
     }
 
-    /**
-     * @param MauticEvents\TokenReplacementEvent $event
-     */
-    public function onTokenReplacement(MauticEvents\TokenReplacementEvent $event)
+    public function onTokenReplacement(TokenReplacementEvent $event): void
     {
         $content = $event->getContent();
         $tokenList = $this->nameToVocativeConverter->findAndReplace($content);
-        if (count($tokenList) > 0) {
+
+        if (!empty($tokenList)) {
             $content = str_replace(array_keys($tokenList), array_values($tokenList), $content);
         }
+
         $event->setContent($content);
     }
 }

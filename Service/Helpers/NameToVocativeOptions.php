@@ -1,119 +1,77 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MauticPlugin\GranamCzechVocativeBundle\Service\Helpers;
+
+use MauticPlugin\GranamCzechVocativeBundle\Service\Helpers\Exceptions\UnknownOption;
 
 class NameToVocativeOptions
 {
-    /**
-     * @var string|null
-     */
-    private $maleAlias = null;
-    /**
-     * @var string|null
-     */
-    private $femaleAlias = null;
-    /**
-     * @var string|null
-     */
-    private $emptyNameAlias = null;
+    private ?string $maleAlias = null;
+    private ?string $femaleAlias = null;
+    private ?string $emptyNameAlias = null;
 
-    public static function createFromString(string $stringOptions): NameToVocativeOptions
+    public static function createFromString(string $stringOptions): self
     {
         $options = [];
         $stringOptions = trim($stringOptions);
+
         if ($stringOptions !== '') {
             $values = explode(',', $stringOptions);
-            if (array_key_exists(0, $values)) {
-                $firstOption = trim($values[0]);
-                if ($firstOption !== '') {
-                    $options['maleAlias'] = $firstOption;
-                }
-            }
-            if (array_key_exists(1, $values)) {
-                $secondOption = trim($values[1]);
-                if ($secondOption !== '') {
-                    $options['femaleAlias'] = $secondOption;
-                }
-            }
-            if (array_key_exists(2, $values)) {
-                $thirdOption = trim($values[2]);
-                if ($thirdOption !== '') {
-                    $options['emptyNameAlias'] = $thirdOption;
-                }
-            }
+
+            $options['maleAlias'] = trim($values[0] ?? '') ?: null;
+            $options['femaleAlias'] = trim($values[1] ?? '') ?: null;
+            $options['emptyNameAlias'] = trim($values[2] ?? '') ?: null;
         }
 
-        return new static($options);
+        return new self($options);
     }
 
     /**
-     * @param array $values
-     * @throws \MauticPlugin\GranamCzechVocativeBundle\Service\Helpers\Exceptions\UnknownOption
+     * @param array<string, ?string> $values
+     * @throws UnknownOption
      */
-    public function __construct(array $values)
+//    public function __construct(array $values)
+    public function __construct(array $values = [])
     {
         foreach ($values as $name => $value) {
-            switch ($name) {
-                case 'maleAlias' :
-                    $this->maleAlias = $value;
-                    break;
-                case 'femaleAlias' :
-                    $this->femaleAlias = $value;
-                    break;
-                case 'emptyNameAlias' :
-                    $this->emptyNameAlias = $value;
-                    break;
-                default :
-                    throw new Exceptions\UnknownOption('Got unknown option of name ' . var_export($name, true));
-            }
+            match ($name) {
+                'maleAlias' => $this->maleAlias = $value,
+                'femaleAlias' => $this->femaleAlias = $value,
+                'emptyNameAlias' => $this->emptyNameAlias = $value,
+                default => throw new UnknownOption("Got unknown option: " . var_export($name, true)),
+            };
         }
     }
 
-    /**
-     * @return bool
-     */
     public function hasMaleAlias(): bool
     {
         return $this->maleAlias !== null;
     }
 
-    /**
-     * @return string|null
-     */
     public function getMaleAlias(): ?string
     {
         return $this->maleAlias;
     }
 
-    /**
-     * @return bool
-     */
     public function hasFemaleAlias(): bool
     {
         return $this->femaleAlias !== null;
     }
 
-    /**
-     * @return string|null
-     */
     public function getFemaleAlias(): ?string
     {
         return $this->femaleAlias;
     }
 
-    /**
-     * @return bool
-     */
     public function hasEmptyNameAlias(): bool
     {
         return $this->emptyNameAlias !== null;
     }
 
-    /**
-     * @return null|string
-     */
     public function getEmptyNameAlias(): ?string
     {
         return $this->emptyNameAlias;
     }
-
 }

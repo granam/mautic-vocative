@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MauticPlugin\GranamCzechVocativeBundle\Service;
 
 use Granam\CzechVocative\CzechName;
@@ -9,101 +12,90 @@ class NameToVocativeConverter
 {
     public const SERVICE_ID = 'plugin.vocative.name_converter';
 
-    /**
-     * @var CzechName
-     */
-    private $name;
+    private CzechName $name;
 
     public function __construct(CzechName $name)
     {
         $this->name = $name;
     }
 
-    /**
-     * @param string $name
-     * @param NameToVocativeOptions|null $options
-     * @return string
-     */
-    public function toVocative(string $name, NameToVocativeOptions $options = null): string
+    public function toVocative(string $name, ?NameToVocativeOptions $options = null): string
     {
         if ($options !== null) {
-            if ($name === '') {
-                if ($options->hasEmptyNameAlias()) {
-                    $name = (string)$options->getEmptyNameAlias();
-                }
+            if ($name === '' && $options->hasEmptyNameAlias()) {
+                $name = (string)$options->getEmptyNameAlias();
             } elseif ($options->hasMaleAlias() && $this->name->isMale($name)) {
                 $name = (string)$options->getMaleAlias();
             } elseif ($options->hasFemaleAlias() && !$this->name->isMale($name)) {
                 $name = (string)$options->getFemaleAlias();
             }
         }
+
         if ($name === '') {
             return '';
         }
 
         $decodedName = html_entity_decode($name);
-        if ($decodedName === $name) {
-            return $this->name->vocative($name);
-        }
 
-        return htmlentities($this->name->vocative($decodedName));
+        return $decodedName === $name
+            ? $this->name->vocative($name)
+            : htmlentities($this->name->vocative($decodedName));
     }
 
     /**
-     * Searching for [name|vocative] (enclosed by native or URL encoded square brackets,
-     * with name optionally enclosed by [square brackets] as well to match email preview
+     * Searches for [name|vocative] and replaces it with the vocative form.
+     *
      * @param string $value
-     * @return array
+     * @return array<string, string>
      */
     public function findAndReplace(string $value): array
     {
-        // regexp is split to parts just to be read easier (logical grouping)
         $regexpParts = [
             '(?<toReplace>',
             [
-                '(?:\[|%5B)', // opening bracket, native or URL encoded
+                '(?:\[|%5B)', // Opening bracket, native or URL encoded
                 [
-                    '\s*', // leading white characters are trimmed
-                    '(', // follows two possible enclosing formats
+                    '\s*', // Trim leading whitespace
+                    '(', // Group for possible formats
                     [
-                        [ // first
-                            '[\[]\s*', // enclosed by brackets
-                            '(?<toVocative1>', $toVocativeRegexp = '(?:[^\[\]]*[^\s\[\]]|)', ')', // without any bracket, ending by non-bracket and non-white-character, or emptiness
-                            '\s*[\]]', // enclosed by brackets
+                        [ // First format: enclosed by brackets
+                            '[\[]\s*',
+                            '(?<toVocative1>(?:[^\[\]]*[^\s\[\]]|))', // No brackets inside
+                            '\s*[\]]',
                         ],
-                        '|', // or
-                        [ // second
-                            '(?<toVocative2>', $toVocativeRegexp, ')' // without enclosing brackets
+                        '|', // Or
+                        [ // Second format: without enclosing brackets
+                            '(?<toVocative2>(?:[^\[\]]*[^\s\[\]]|))',
                         ],
                     ],
-                    ')', // end of combinations group
-                    '\s*', // trailing white characters are trimmed
-                    '\|\s*vocative\s*', // with trailing (relatively to name) pipe and keyword "vocative"
-                    '(?:\(+', // options are enclosed in parentheses
+                    ')',
+                    '\s*', // Trim trailing whitespace
+                    '\|\s*vocative\s*', // Pipe and "vocative" keyword
+                    '(?:\(+', // Options in parentheses
                     [
                         '\s*',
-                        '(?<options>[^\)\]]*[^\)\]\s])?', // optional values of options with fail-save by excluded right bracket in case of missing closing parenthesis
+                        '(?<options>[^\)\]]*[^\)\]\s])?', // Optional options
                         '\s*',
                     ],
-                    '\)*)?', // last parenthesis can be (but should not be) omitted, whole options are optional
-                    '\s*', // trailing white characters are trimmed
+                    '\)*)?', // Optional closing parenthesis
+                    '\s*', // Trim trailing whitespace
                 ],
-                '(?:\]|%5D)', // closing bracket, native or URL encoded
+                '(?:\]|%5D)', // Closing bracket, native or URL encoded
             ],
             ')',
         ];
-        $regexp = '~' . RecursiveImplode::implode($regexpParts) . '~u'; // u = UTF-8
+
+        $regexp = '~' . RecursiveImplode::implode($regexpParts) . '~u'; // UTF-8
         $tokens = [];
-        /** @var array|string[][] $matches */
+
+        /** @var array<string, array<string>> $matches */
         if (preg_match_all($regexp, $value, $matches) > 0) {
             foreach ($matches['toReplace'] as $index => $toReplace) {
-                $toVocative = '';
-                if ($matches['toVocative1'][$index] !== '') {
-                    $toVocative = $matches['toVocative1'][$index];
-                } elseif ($matches['toVocative2'][$index] !== '') {
-                    $toVocative = $matches['toVocative2'][$index];
-                }
-                $stringOptions = $matches['options'][$index];
+                $toVocative = $matches['toVocative1'][$index] !== ''
+                    ? $matches['toVocative1'][$index]
+                    : $matches['toVocative2'][$index];
+
+                $stringOptions = $matches['options'][$index] ?? '';
                 $tokens[$toReplace] = $this->toVocative($toVocative, NameToVocativeOptions::createFromString($stringOptions));
             }
         }

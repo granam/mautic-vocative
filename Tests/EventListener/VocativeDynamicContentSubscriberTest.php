@@ -19,7 +19,7 @@ class VocativeDynamicContentSubscriberTest extends GranamTestWithMockery
     public static function I_can_get_subscribed_events()
     {
         self::assertSame(
-            [DynamicContentEvents::TOKEN_REPLACEMENT => ['onTokenReplacement', -10]],
+            ['mautic.dynamic_content_on_token_replacement' => ['onTokenReplacement', -10]],
             VocativeDynamicContentSubscriber::getSubscribedEvents()
         );
         $reflectionClass = new \ReflectionClass(VocativeDynamicContentSubscriber::class);

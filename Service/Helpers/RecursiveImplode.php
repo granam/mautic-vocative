@@ -7,7 +7,7 @@ class RecursiveImplode
     {
         return implode(
             array_map(
-                function ($value) {
+                function ($value): string {
                     if (is_array($value)) {
                         return self::implode($value);
                     }
