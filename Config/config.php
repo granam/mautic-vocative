@@ -9,7 +9,7 @@ use MauticPlugin\GranamCzechVocativeBundle\EventListener\VocativeDynamicContentS
 return [
     'name' => 'Czech vocative',
     'description' => 'Convert names to vocative form in Czech.',
-    'author' => 'Jaroslav Týc',
+    'author' => 'Iuri Jorbenadze, Jaroslav Týc',
     'version' => '5.1.1',
     'services' => [
         'events' => [

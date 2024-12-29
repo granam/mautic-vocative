@@ -1,7 +1,7 @@
 {
-  "name": "granam/mautic-czech-vocative-bundle",
+  "name": "iurijorbenadze/mautic-czech-vocative-bundle",
   "license": "MIT",
-  "description": "Modifier for first names to convert their base form to vocative in czech",
+  "description": "Modifier for first names to convert their base form to vocative in Czech",
   "type": "mautic-plugin",
   "keywords": [
     "mautic",
@@ -37,6 +37,16 @@
     "mockery/mockery": "~1.0",
     "rector/rector": "^0.14.2"
   },
+  "authors": [
+    {
+      "name": "Iuri Jorbenadze",
+      "email": "jorbenadze2001@gmail.com"
+    },
+    {
+      "name": "Jaroslav Týc",
+      "email": ""
+    }
+  ],
   "minimum-stability": "dev",
   "prefer-stable": true,
   "config": {
